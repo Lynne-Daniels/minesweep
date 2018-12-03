@@ -12,3 +12,16 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+.row {
+  display: flex;
+}
+.square {
+  background-color: pink;
+  display: inline-flex;
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid gold;
+  justify-content: center;
+  align-items: center;
+  font-size: .5rem;
+}
