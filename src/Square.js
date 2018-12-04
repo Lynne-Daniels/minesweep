@@ -6,14 +6,13 @@ class Square extends Component {
     super(props);
     this.state = {
       clicked: false,
-      emoji: ''
     }
   }
 
   handleClick (e) {
     e.preventDefault();
     this.props.squareStuff.handleClick(e, this.props.squareStuff);
-    this.setState({clicked: true, emoji: this.props.squareStuff.char})
+    this.setState({clicked: true})
   }
 
 
@@ -21,7 +20,7 @@ class Square extends Component {
 
     return (
       <div>
-        <div className="square" onClick={this.handleClick.bind(this)}>{this.state.emoji}</div>
+        <div className="square" onClick={this.handleClick.bind(this)}>{this.state.clicked ? this.props.squareStuff.char : ''}</div>
       </div>
     );
   }
