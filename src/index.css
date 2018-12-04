@@ -17,11 +17,12 @@ code {
 }
 .square {
   background-color: pink;
-  display: inline-flex;
+  /* display: inline-flex; */
   width: 1rem;
   height: 1rem;
   border: 1px solid gold;
   justify-content: center;
   align-items: center;
   font-size: .5rem;
+  line-height: 1rem;
 }

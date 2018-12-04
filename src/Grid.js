@@ -13,6 +13,7 @@ class Grid extends Component {
           col,
           val: 'blank',
           char: '💦',
+          count:0,
           handleClick : (e, ss) => {
             console.log(ss.row, ss.col, 'was clicked')
           }
@@ -22,7 +23,7 @@ class Grid extends Component {
       }
       grid.push(rowArr);
     }
-
+    // add mines
     for (let count = 0; count < 99; count++) {
       let randRow = Math.floor(Math.random() * height);
       let randCol = Math.floor(Math.random() * width);
@@ -33,10 +34,37 @@ class Grid extends Component {
         count--;
       }
     }
+    // test count Mines
     let countMines = grid.reduce((acc, row) => {
       return acc + row.reduce((a, v) => v.val === 'mine' ? a + 1 : a + 0, 0)
     }, 0)
     console.log('countMines: ', countMines);
+    // add numbers
+    // loop over all the squares
+    grid.forEach((row, rowIdx) => {
+      row.forEach((col, colIdx) => {
+        // loop over neighboring squares
+        const topRow = rowIdx - 1;
+        const bottomRow = rowIdx + 1;
+        const leftCol = colIdx - 1;
+        const rightCol = colIdx + 1;
+        let count = 0;
+        for (let r = topRow; r <= bottomRow; r++) {
+          for (let c = leftCol; c <= rightCol; c++) {
+            if (r < 0 || r >= grid.length || c < 0 || c >= grid[0].length || (r === rowIdx && c === colIdx)) {
+              // do nothing - ignore self and ignore off the grid cells
+            } else if (grid[r][c].val === 'mine') {
+              // if neighboring square exists and has mine: count++
+              grid[rowIdx][colIdx].count++;
+            }
+          }
+        }
+        if (grid[rowIdx][colIdx].val !== 'mine' && grid[rowIdx][colIdx].count !== 0)
+        grid[rowIdx][colIdx].char = grid[rowIdx][colIdx].count.toString();
+        
+      })
+    })
+    // assign count to current squares value and char
     return grid;
   }
 
