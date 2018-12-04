@@ -3,6 +3,20 @@ import Square from './Square.js';
 
 class Grid extends Component {
 
+   constructor(props) {
+    super(props);
+    this.state = {
+      grid: this.makeGrid(30, 16)
+    }
+  }
+
+  clearSquare(row, col) {
+    this.setState((state) => {
+      const newGrid = [...state.grid];
+      newGrid[row][col].isCleared = true;
+      return {grid: newGrid};
+    })
+  }
   makeGrid(width, height) {
     const grid = [];
     for (let row = 0; row < height; row++) {
@@ -14,8 +28,33 @@ class Grid extends Component {
           val: 'blank',
           char: '💦',
           count:0,
+          isCleared: false,
           handleClick : (e, ss) => {
             console.log(ss.row, ss.col, 'was clicked')
+            this.clearSquare(ss.row, ss.col);
+            if (ss.val === 'blank' && ss.count === 0) {
+              console.log('blank clicked');
+              let clearRow = ss.row;
+              let clearCol = ss.col;
+              while (grid[clearRow + 1]) {
+                // if (true) {
+                if(grid[clearRow + 1][clearCol].val === 'blank'){
+                  console.log('TODO figure out how to change state of this thing', clearRow);
+                  // grid[clearRow + 1][clearCol].isCleared = true;
+                  clearRow++;
+                  this.clearSquare(clearRow, clearCol)
+                  if (grid[clearRow][clearCol].count !== 0) {
+                    break;
+                  }
+                } else {
+                  // clearRow++;
+                  break;
+                }
+              }
+            }
+            if (ss.val === 'mine') {
+              console.log('🔥KaBoom🔥'); // TODO END GAME
+            }
           }
         }
         square.handleClick = square.handleClick.bind(square);
@@ -41,14 +80,13 @@ class Grid extends Component {
     console.log('countMines: ', countMines);
     // add numbers
     // loop over all the squares
-    grid.forEach((row, rowIdx) => {
+    grid.forEach((row, rowIdx, arr) => {
       row.forEach((col, colIdx) => {
         // loop over neighboring squares
         const topRow = rowIdx - 1;
         const bottomRow = rowIdx + 1;
         const leftCol = colIdx - 1;
         const rightCol = colIdx + 1;
-        let count = 0;
         for (let r = topRow; r <= bottomRow; r++) {
           for (let c = leftCol; c <= rightCol; c++) {
             if (r < 0 || r >= grid.length || c < 0 || c >= grid[0].length || (r === rowIdx && c === colIdx)) {
@@ -72,19 +110,19 @@ class Grid extends Component {
     return (
       <div className="row" key={idx}>
       {row.map((val) => {
-        return <Square key={val.row + '-' + val.col}squareStuff={val} char={'g'}/>
+        return <Square key={val.row + '-' + val.col} squareStuff={val} char={'g'}/>
       })}
       </div>
     )
   }
   render() {
-   const grid = this.makeGrid(30, 16);
+  //  const grid = this.makeGrid(30, 16);
 
    return(
 
 
     <div>
-      {grid.map((row, idx) => this.makeRow(row, idx))}
+      {this.state.grid.map((row, idx) => this.makeRow(row, idx))}
     </div>
    )
   }
