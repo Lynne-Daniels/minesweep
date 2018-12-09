@@ -5,17 +5,76 @@ class Grid extends Component {
 
    constructor(props) {
     super(props);
+    this.height = 17;
+    this.width = 31;
     this.state = {
-      grid: this.makeGrid(30, 16)
+      grid: this.makeGrid(this.width, this.height)
     }
+    this.clearSquare = this.clearSquare.bind(this);
+    this.sweep = this.sweep.bind(this);
   }
 
-  clearSquare(row, col) {
-    this.setState((state) => {
-      const newGrid = [...state.grid];
+  clearSquare(row, col, cb = () => {}) {
+    this.setState((prevState) => {
+      const newGrid = [...prevState.grid];
       newGrid[row][col].isCleared = true;
+      console.log('newGrid isCleared??? ', newGrid[row][col].isCleared);
       return {grid: newGrid};
-    })
+    }, cb)
+  }
+  
+  // when a clear square is cleared, reveal all adjacent squares above and below
+  // recursive? need to travel on all paths of clear squares, vert horiz and diag.
+  sweep(row, col, e) {
+    console.log('inside sweep: ', this.state.grid, col, row);
+    if (this.state.grid[row][col].isCleared) {
+      return;
+    }
+    const sweepNeighbors = () => {
+      console.log('outside sweepNeighbors: ', row, col);
+      return (() => {
+        console.log('inside sweepNeighbors: ', row, col);
+        const rowAbove = row - 1;
+          const rowBelow = row + 1;
+          for (let c = col -1; c < col + 2; c++) {
+            this.sweep(rowAbove, c);
+            this.sweep(rowBelow, c);
+          }
+          this.sweep(row, col - 1);
+          this.sweep(row, col + 1);
+      })();
+    }
+    // if square does not exist, ignore it
+    if (row < 0 || row > this.height|| col < 0 || col > this.width) {
+      return;
+    }
+    const square = this.state.grid[row][col];
+    console.log('clearing from: ', square, square.isCleared);
+    if (square.val === 'mine' && e && e.type === 'click') {
+      this.clearSquare(row, col);
+      console.log('🔥KaBoom🔥'); // TODO END GAME
+      return;
+    }
+    
+    // if it is a square and is blank, clear it
+    if (square.count > 0) {
+      this.clearSquare(row, col);
+      return;
+    }
+    // if it is also 0 count, clear the neighbors too.
+    if (square.val === 'blank' && !this.state.grid[row][col].isCleared) {
+      // clear squares around the mine-free area
+      console.log('Before --- isCleared??? ', this.state.grid[row][col].isCleared);
+      this.clearSquare(row, col);
+      this.clearSquare(row, col, sweepNeighbors);
+      console.log('After --- isCleared??? ', this.state.grid[row][col].isCleared)
+      setTimeout(() => console.log('After 1 second --- isCleared??? ', this.state.grid[row][col].isCleared), 1000);
+
+      
+    }
+
+    return;
+
   }
   makeGrid(width, height) {
     const grid = [];
@@ -31,30 +90,28 @@ class Grid extends Component {
           isCleared: false,
           handleClick : (e, ss) => {
             console.log(ss.row, ss.col, 'was clicked')
-            this.clearSquare(ss.row, ss.col);
-            if (ss.val === 'blank' && ss.count === 0) {
-              console.log('blank clicked');
-              let clearRow = ss.row;
-              let clearCol = ss.col;
-              while (grid[clearRow + 1]) {
-                // if (true) {
-                if(grid[clearRow + 1][clearCol].val === 'blank'){
-                  console.log('TODO figure out how to change state of this thing', clearRow);
-                  // grid[clearRow + 1][clearCol].isCleared = true;
-                  clearRow++;
-                  this.clearSquare(clearRow, clearCol)
-                  if (grid[clearRow][clearCol].count !== 0) {
-                    break;
-                  }
-                } else {
-                  // clearRow++;
-                  break;
-                }
-              }
-            }
-            if (ss.val === 'mine') {
-              console.log('🔥KaBoom🔥'); // TODO END GAME
-            }
+            // this.clearSquare(ss.row, ss.col);
+            this.sweep(ss.row, ss.col, e);
+            // if (ss.val === 'blank' && ss.count === 0) {
+            //   console.log('blank clicked');
+            //   let clearRow = ss.row;
+            //   let clearCol = ss.col;
+            //   while (grid[clearRow + 1]) {
+            //     // if (true) {
+            //     if(grid[clearRow + 1][clearCol].val === 'blank'){
+            //       console.log('TODO figure out how to change state of this thing', clearRow);
+            //       // grid[clearRow + 1][clearCol].isCleared = true;
+            //       clearRow++;
+            //       this.clearSquare(clearRow, clearCol)
+            //       if (grid[clearRow][clearCol].count !== 0) {
+            //         break;
+            //       }
+            //     } else {
+            //       // clearRow++;
+            //       break;
+            //     }
+            //   }
+            // }
           }
         }
         square.handleClick = square.handleClick.bind(square);
@@ -99,10 +156,8 @@ class Grid extends Component {
         }
         if (grid[rowIdx][colIdx].val !== 'mine' && grid[rowIdx][colIdx].count !== 0)
         grid[rowIdx][colIdx].char = grid[rowIdx][colIdx].count.toString();
-        
       })
     })
-    // assign count to current squares value and char
     return grid;
   }
 
