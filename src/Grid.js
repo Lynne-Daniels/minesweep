@@ -5,8 +5,8 @@ class Grid extends Component {
 
    constructor(props) {
     super(props);
-    this.height = 17;
-    this.width = 31;
+    this.height = 16;
+    this.width = 30;
     this.state = {
       grid: this.makeGrid(this.width, this.height)
     }
@@ -26,6 +26,10 @@ class Grid extends Component {
   // when a clear square is cleared, reveal all adjacent squares above and below
   // recursive? need to travel on all paths of clear squares, vert horiz and diag.
   sweep(row, col, e) {
+    // if square does not exist, ignore it
+    if (row < 0 || row > this.height|| col < 0 || col > this.width) {
+      return;
+    }
     console.log('inside sweep: ', this.state.grid, col, row);
     if (this.state.grid[row][col].isCleared) {
       return;
@@ -35,18 +39,22 @@ class Grid extends Component {
       return (() => {
         console.log('inside sweepNeighbors: ', row, col);
         const rowAbove = row - 1;
-          const rowBelow = row + 1;
-          for (let c = col -1; c < col + 2; c++) {
+        const rowBelow = row + 1;
+        for (let c = Math.max(0, col - 1); c < Math.min(this.width, col + 2); c++) {
+          if (rowAbove >= 0) {
             this.sweep(rowAbove, c);
+          }
+          if (rowBelow < this.height) {
             this.sweep(rowBelow, c);
           }
+        }
+        if (col > 1) {
           this.sweep(row, col - 1);
+        }
+        if (col < this.width - 1) {
           this.sweep(row, col + 1);
+        }
       })();
-    }
-    // if square does not exist, ignore it
-    if (row < 0 || row > this.height|| col < 0 || col > this.width) {
-      return;
     }
     const square = this.state.grid[row][col];
     console.log('clearing from: ', square, square.isCleared);
