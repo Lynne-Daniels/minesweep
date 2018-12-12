@@ -31,7 +31,21 @@ class Grid extends Component {
   }
 
   endGame(){
-
+    // stop timer
+    clearInterval(this.state.timer);
+    // lock squares
+    this.setState((prevState) => {
+      let newGrid = {...prevState.grid.map((rows) => rows.map((square) => {
+        square.isActive = false;
+        return {
+          square,
+        }
+      }))};
+      return newGrid;
+    })
+    // put red background on accidental mine if boom ended game
+    // show all mines
+    // if all mines found, or if only mines are left, clear other squares
   }
 
   startGame(){
@@ -118,6 +132,7 @@ class Grid extends Component {
     if (square.val === 'mine' && e && (e.type === 'click' || e.type === 'mousedown')) {
       this.clearSquare(row, col);
       console.log('🔥KaBoom🔥'); // TODO END GAME
+      this.endGame();
       return;
     }
     
@@ -153,7 +168,7 @@ class Grid extends Component {
           isCleared: false,
           handleClick : (e, ss) => {
             e.preventDefault();
-            if (this.state.timer === null) {
+            if (this.state.timer === null & this.state.grid[ss.row][ss.col].val === 'blank') {
               this.setState({timer: this.startGame()});
             }
             console.log(ss.row, ss.col, e.button, 'was clicked')
