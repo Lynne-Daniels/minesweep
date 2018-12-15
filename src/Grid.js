@@ -41,28 +41,38 @@ class Grid extends Component {
 
   }
 
+  endGameIfWon() {
+    // TODO make the inefficient recursive function to clear squares faster, then keep a 
+    // running total of clearedsquares, measure how much faster that is than recalculating all the time
+    // project: set up a dashboard to measure and visualize the difference before fixing
+    const countClearedSquares = () => {
+      return this.state.grid.reduce((total, row) => {
+        return total + row.reduce((subTotal, square) => {
+          if (square.isCleared && square.val === 'blank') {
+            return subTotal + 1;
+          }
+          return subTotal;
+        }, 0) 
+      }, 0)
+    }
+    console.log('countOfClearedSquares : ', countClearedSquares(), this.state.unclearedNonMinedSquares)
+    if (countClearedSquares() === this.state.unclearedNonMinedSquares) {
+      console.log('GAME SHOULD END NOW')
+      this.endGame(true);
+    }
+  }
+
   endGame(isWin){
     // stop timer
     clearInterval(this.state.timer);
-    // lock squares
-    // this.setState((prevState) => {
-    //   let newState = {...prevState};
-    //   let newGrid = {newState.grid.map((rows) => rows.map((square) => {
-    //     square.isActive = false;
-    //     return {
-    //       square,
-    //     }
-    //   }))};
-    //   return {grid: newGrid};
-    // })
-
-    // show all mines
-    if (isWin === false) {
+    // lock squares and show all mines
+    if (true) {
       this.setState((prevState) => {
         const newState = {...prevState}
         newState.grid = prevState.grid.map((row) => row.map((square) => {
           square.isActive = false;
-          if (square.val === 'mine') {
+          if (square.val === 'mine' && square.char !== '🚩') {
+            square.char = isWin ? '🚩' : '💣'
             square.isCleared = true;
           }
           return square;
@@ -70,20 +80,6 @@ class Grid extends Component {
         return newState;
       })
     }
-    // if (isWin === false) {
-    //   this.setState((prevState) => {
-    //     const newState = {...prevState}
-    //     newState.grid = prevState.grid.map((row) => {
-    //       return row.map((square) => {
-    //         if (square.val === 'mine') {
-    //           square.isCleared = true;
-    //         }
-    //         return square;
-    //       })
-    //     })
-    //     return {grid: newState.grid}
-    //   })
-    // }
   }
     // if all mines found, or if only mines are left, clear other squares
   
@@ -122,17 +118,18 @@ class Grid extends Component {
     })
   }
   clearSquare(row, col, cb = () => {}) {
-    if (this.state.grid[row][col].isActive === true) {
-      console.log('here i am!!!')
-      this.setState((prevState) => {
-        return {unclearedNonMinedSquares: prevState.unclearedNonMinedSquares - 1}
-      });
+    if (this.state.grid[row][col].isCleared === false) {
+      // console.log('here i am!!!')
+      // this.setState((prevState) => {
+      //   return {unclearedNonMinedSquares: prevState.unclearedNonMinedSquares - 1}
+      // });
+      //this.endGameIfWon();
     }
     this.setState((prevState) => {
       const newGrid = [...prevState.grid];
       newGrid[row][col].isCleared = true;
       newGrid[row][col].isActive = false;
-      console.log('newGrid isCleared??? ', newGrid[row][col].isCleared);
+      // console.log('newGrid isCleared??? ', row, col, newGrid[row][col].isCleared);
       return {grid: newGrid};
     }, cb)
   }
@@ -149,9 +146,9 @@ class Grid extends Component {
       return;
     }
     const sweepNeighbors = () => {
-      console.log('outside sweepNeighbors: ', row, col);
+      // console.log('outside sweepNeighbors: ', row, col);
       return (() => {
-        console.log('inside sweepNeighbors: ', row, col);
+        // console.log('inside sweepNeighbors: ', row, col);
         const rowAbove = row - 1;
         const rowBelow = row + 1;
         for (let c = Math.max(0, col - 1); c < Math.min(this.width, col + 2); c++) {
@@ -189,7 +186,7 @@ class Grid extends Component {
     
     // if it is a square and is blank, clear it
     if (square.count > 0) {
-      this.clearSquare(row, col);
+      this.clearSquare(row, col, this.endGameIfWon);
       return;
     }
     // if it is also 0 count, clear the neighbors too.
@@ -242,7 +239,6 @@ class Grid extends Component {
     for (let count = 0; count < this.state.numMines; count++) {
       let randRow = Math.floor(Math.random() * height);
       let randCol = Math.floor(Math.random() * width);
-      console.log('NaN??? ', grid, randRow, randCol);
       if (grid[randRow][randCol].val === 'blank') {
         grid[randRow][randCol].val = 'mine';
         grid[randRow][randCol].char = '💣'
@@ -251,10 +247,10 @@ class Grid extends Component {
       }
     }
     // test count Mines
-    let countMines = grid.reduce((acc, row) => {
-      return acc + row.reduce((a, v) => v.val === 'mine' ? a + 1 : a + 0, 0)
-    }, 0)
-    console.log('countMines: ', countMines);
+    // let countMines = grid.reduce((acc, row) => {
+    //   return acc + row.reduce((a, v) => v.val === 'mine' ? a + 1 : a + 0, 0)
+    // }, 0)
+    // console.log('countMines: ', countMines);
     // add numbers
     // loop over all the squares
     grid.forEach((row, rowIdx, arr) => {
