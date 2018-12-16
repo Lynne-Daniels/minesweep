@@ -8,9 +8,47 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+button {
+  border: none;
+  height: 3rem;
+  width: 3rem;
+  font-size: 3rem;
+  line-height: 3rem;
+  padding: 0;
+}
+button.focus, button:focus {
+  outline: 0;
+  box-shadow: none!important;
+}
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
+}
+
+.scoreboard {
+  display: flex;
+  flex-direction: column;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+.score-title, .score-item{
+   margin: 0 1rem;
+}
+
+.score-title {
+  font-size: 1rem;
+}
+
+.score-item {
+  background-color: #DBE2E8;
+}
+
+header {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
 }
 .row {
   display: flex;
@@ -25,4 +63,19 @@ code {
   align-items: center;
   font-size: .5rem;
   line-height: 1rem;
+}
+
+.container {
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.centered {
+  margin: 0 auto;
+}
+@media(min-width: 400px) {
+  .container {
+  margin: 3rem 0;
+  }
 }

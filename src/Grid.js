@@ -5,25 +5,41 @@ class Grid extends Component {
 
    constructor(props) {
     super(props);
+    this.faces = {
+      newGame: '😀',
+      winner: '😎',
+      loser: '😖'
+    }
     this.height = 9;
     this.width = 9;
+    this.blankSquares = 71
+    this.numMines = 10
     this.state = {
+      face: this.faces.newGame,
       grid: [],
-      numMines: 10,
+      numMines: this.numMines,
       seconds: 0,
       timer: null,
-      unclearedNonMinedSquares: 71
+      unclearedNonMinedSquares: this.blankSquares
     }
     this.clearSquare = this.clearSquare.bind(this);
     this.sweep = this.sweep.bind(this);
   }
 
   componentDidMount() {
+    this.initializeGame();
+  }
+
+  initializeGame() {
     this.setState((prevState) => {
       const newState = {prevState};
       newState.grid = this.makeGrid(this.width, this.height);
       return {
-        grid: newState.grid
+        grid: newState.grid,
+        face: this.faces.newGame,
+        numMines: this.numMines,
+        seconds: 0,
+        unclearedNonMinedSquares: this.blankSquares
       };
     })
   }
@@ -55,9 +71,7 @@ class Grid extends Component {
         }, 0) 
       }, 0)
     }
-    console.log('countOfClearedSquares : ', countClearedSquares(), this.state.unclearedNonMinedSquares)
     if (countClearedSquares() === this.state.unclearedNonMinedSquares) {
-      console.log('GAME SHOULD END NOW')
       this.endGame(true);
     }
   }
@@ -77,13 +91,13 @@ class Grid extends Component {
           }
           return square;
         }))
+        newState.face = isWin ? this.faces.winner : this.faces.loser;
+        newState.timer = null;
         return newState;
       })
     }
   }
-    // if all mines found, or if only mines are left, clear other squares
   
-
   startGame(){
     console.log('starting game');
     let timer = setInterval(() => {
@@ -91,6 +105,7 @@ class Grid extends Component {
     }, 1000);
     return timer;
   }
+
   labelMine(row, col) {
     this.setState((prevState) => {
       const newGrid = [...prevState.grid];
@@ -118,18 +133,10 @@ class Grid extends Component {
     })
   }
   clearSquare(row, col, cb = () => {}) {
-    if (this.state.grid[row][col].isCleared === false) {
-      // console.log('here i am!!!')
-      // this.setState((prevState) => {
-      //   return {unclearedNonMinedSquares: prevState.unclearedNonMinedSquares - 1}
-      // });
-      //this.endGameIfWon();
-    }
     this.setState((prevState) => {
       const newGrid = [...prevState.grid];
       newGrid[row][col].isCleared = true;
       newGrid[row][col].isActive = false;
-      // console.log('newGrid isCleared??? ', row, col, newGrid[row][col].isCleared);
       return {grid: newGrid};
     }, cb)
   }
@@ -141,14 +148,11 @@ class Grid extends Component {
     if (row < 0 || row > this.height|| col < 0 || col > this.width) {
       return;
     }
-    console.log('inside sweep: ', this.state.grid, col, row);
     if (this.state.grid[row][col].isCleared) {
       return;
     }
     const sweepNeighbors = () => {
-      // console.log('outside sweepNeighbors: ', row, col);
       return (() => {
-        // console.log('inside sweepNeighbors: ', row, col);
         const rowAbove = row - 1;
         const rowBelow = row + 1;
         for (let c = Math.max(0, col - 1); c < Math.min(this.width, col + 2); c++) {
@@ -168,13 +172,8 @@ class Grid extends Component {
       })();
     }
     const square = this.state.grid[row][col];
-    console.log('clearing from: ', square, square.isCleared);
-    if (e) {
-      console.log(e.type);
-    }
     if (square.val === 'mine' && e && (e.type === 'click' || e.type === 'mousedown')) {
       this.clearSquare(row, col);
-      console.log('🔥KaBoom🔥'); // TODO END GAME
       this.setState((prevState) => {
         const newState = {...prevState};
         newState.grid[row][col].char = '🔥';
@@ -183,7 +182,6 @@ class Grid extends Component {
       this.endGame(false);
       return;
     }
-    
     // if it is a square and is blank, clear it
     if (square.count > 0) {
       this.clearSquare(row, col, this.endGameIfWon);
@@ -194,13 +192,10 @@ class Grid extends Component {
       // clear squares around the mine-free area
       this.clearSquare(row, col);
       this.clearSquare(row, col, sweepNeighbors);
-
-      
     }
-
     return;
-
   }
+
   makeGrid(width, height) {
     const grid = [];
     for (let row = 0; row < height; row++) {
@@ -219,7 +214,6 @@ class Grid extends Component {
             if (this.state.timer === null & this.state.grid[ss.row][ss.col].val === 'blank') {
               this.setState({timer: this.startGame()});
             }
-            console.log(ss.row, ss.col, e.button, 'was clicked')
             if (this.state.grid[ss.row][ss.col].isActive) {
               if (e.button === 0) {
                 this.sweep(ss.row, ss.col, e);
@@ -235,8 +229,9 @@ class Grid extends Component {
       }
       grid.push(rowArr);
     }
+
     // add mines
-    for (let count = 0; count < this.state.numMines; count++) {
+    for (let count = 0; count < this.numMines; count++) {
       let randRow = Math.floor(Math.random() * height);
       let randCol = Math.floor(Math.random() * width);
       if (grid[randRow][randCol].val === 'blank') {
@@ -246,13 +241,8 @@ class Grid extends Component {
         count--;
       }
     }
-    // test count Mines
-    // let countMines = grid.reduce((acc, row) => {
-    //   return acc + row.reduce((a, v) => v.val === 'mine' ? a + 1 : a + 0, 0)
-    // }, 0)
-    // console.log('countMines: ', countMines);
-    // add numbers
-    // loop over all the squares
+
+    // loop over all the squares adding numbers
     grid.forEach((row, rowIdx, arr) => {
       row.forEach((col, colIdx) => {
         // loop over neighboring squares
@@ -287,14 +277,22 @@ class Grid extends Component {
     )
   }
   render() {
-  //  const grid = this.makeGrid(30, 16);
-
    return(
-
-
-    <div>
-      <div><div>#mines: {this.state.numMines}</div><div>Game on/over</div><div>Timer{this.state.seconds}</div></div>
+    <div className="container">
+      <header>
+        <div className="scoreboard">
+          <div className="score-title">Mines</div>
+          <div className="score-item">{this.state.numMines} </div>
+        </div>
+        <button onClick={()=>this.initializeGame()}>{this.state.face}</button>
+        <div className="scoreboard">
+          <div className="score-title">Timer</div>
+          <div className="score-item">{this.state.seconds} </div>
+        </div>
+      </header>
+      <main className="centered">
       {this.state.grid.map((row, idx) => this.makeRow(row, idx))}
+      </main>
     </div>
    )
   }
