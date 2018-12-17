@@ -45,7 +45,6 @@ class Grid extends Component {
   }
 
   startTimer() {
-    console.log('tick');
     this.setState((prevState) => {
       return {
         seconds: prevState.seconds + 1
@@ -102,7 +101,6 @@ class Grid extends Component {
   }
   
   startGame(){
-    console.log('starting game');
     let timer = setInterval(() => {
       this.startTimer();
     }, 1000);

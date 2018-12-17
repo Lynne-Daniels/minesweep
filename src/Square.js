@@ -4,7 +4,6 @@ class Square extends Component {
 
   handleClick (e) {
     e.preventDefault();
-    console.log('button: ', e.button);
     this.props.squareStuff.handleClick(e, this.props.squareStuff);
   }
 
