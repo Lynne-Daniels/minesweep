@@ -89,6 +89,9 @@ class Grid extends Component {
             square.char = isWin ? '🚩' : '💣'
             square.isCleared = true;
           }
+          if (square.val === 'blank' && square.char === '🚩') {
+            square.char = '❌'
+          }
           return square;
         }))
         newState.face = isWin ? this.faces.winner : this.faces.loser;
