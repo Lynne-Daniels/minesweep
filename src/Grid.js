@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Square from './Square.js';
+import Instructions from './Instructions.js';
 
 class Grid extends Component {
 
@@ -15,6 +16,10 @@ class Grid extends Component {
     this.blankSquares = 71
     this.numMines = 10
     this.state = {
+      height: 9,
+      width: 9,
+      numMines: 10,
+      blankSquares: 71,
       face: this.faces.newGame,
       grid: [],
       numMines: this.numMines,
@@ -294,6 +299,9 @@ class Grid extends Component {
       <main className="centered">
       {this.state.grid.map((row, idx) => this.makeRow(row, idx))}
       </main>
+      <div>
+        <Instructions />
+      </div>
     </div>
    )
   }
