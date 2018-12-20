@@ -1,3 +1,14 @@
+View the Application: https://lynne-daniels.github.io/minesweep/
+
+
+
+
+To Deploy Changes:
+
+`yarn build`
+`yarn run deploy`
+additional information: https://github.com/gitname/react-gh-pages
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
