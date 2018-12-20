@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Square from './Square.js';
 import Instructions from './Instructions.js';
+import SelectGame from './SelectGame.js';
 
 class Grid extends Component {
 
@@ -11,14 +12,47 @@ class Grid extends Component {
       winner: '😎',
       loser: '😖'
     }
-    this.height = 9;
-    this.width = 9;
-    this.blankSquares = 71
-    this.numMines = 10
+    this.gameOptions = {
+      beginner: {
+        height: 9,
+        width: 9,
+        totalNumMines: 10,
+        blankSquares: 71
+      },
+      advanced: {  // TODO look up traditional sizes online
+        height: 16,
+        width: 16,
+        totalNumMines: 40,
+        blankSquares: 216
+      },
+      expert: {
+        height: 16,
+        width: 30,
+        totalNumMines: 99,
+        blankSquares: 381
+      }
+    }
+    this.changeGame = {
+      handleChange: ((game) => {
+      console.log('Game options clicked', game)
+      clearInterval(this.state.timer);
+      this.setState((prevState) => {
+        let newState = {...prevState};
+        return {
+          ...newState,
+          ...this.gameOptions[game]
+        }
+        }, this.initializeGame())
+      })
+    }
+    // this.height = 9;
+    // this.width = 9;
+    // this.blankSquares = 71
+    // this.numMines = 10
     this.state = {
       height: 9,
       width: 9,
-      numMines: 10,
+      totalNumMines: 10,
       blankSquares: 71,
       face: this.faces.newGame,
       grid: [],
@@ -27,8 +61,8 @@ class Grid extends Component {
       timer: null,
       unclearedNonMinedSquares: this.blankSquares
     }
-    this.clearSquare = this.clearSquare.bind(this);
-    this.sweep = this.sweep.bind(this);
+    // this.clearSquare = this.clearSquare.bind(this);
+    // this.sweep = this.sweep.bind(this);
   }
 
   componentDidMount() {
@@ -36,15 +70,17 @@ class Grid extends Component {
   }
 
   initializeGame() {
+    console.log('initializing', this.state)
     this.setState((prevState) => {
-      const newState = {prevState};
-      newState.grid = this.makeGrid(this.width, this.height);
+      const newState = {...prevState};
+      newState.grid = this.makeGrid(this.state.width, this.state.height);
       return {
+        newState,
         grid: newState.grid,
         face: this.faces.newGame,
-        numMines: this.numMines,
+        numMines: this.state.totalNumMines,
         seconds: 0,
-        unclearedNonMinedSquares: this.blankSquares
+        unclearedNonMinedSquares: this.state.blankSquares
       };
     })
   }
@@ -57,8 +93,8 @@ class Grid extends Component {
     });
   }
 
-  stopTimer(timer) {
-
+  changeGridSize(size) {  // beginner, advanced, expert
+    
   }
 
   endGameIfWon() {
@@ -151,7 +187,7 @@ class Grid extends Component {
   // recursively travel on all paths of clear squares, vertical, horizontal, and diagonal.
   sweep(row, col, e) {
     // if square does not exist, ignore it
-    if (row < 0 || row > this.height|| col < 0 || col > this.width) {
+    if (row < 0 || row > this.state.height|| col < 0 || col > this.state.width) {
       return;
     }
     if (this.state.grid[row][col].isCleared) {
@@ -161,18 +197,18 @@ class Grid extends Component {
       return (() => {
         const rowAbove = row - 1;
         const rowBelow = row + 1;
-        for (let c = Math.max(0, col - 1); c < Math.min(this.width, col + 2); c++) {
+        for (let c = Math.max(0, col - 1); c < Math.min(this.state.width, col + 2); c++) {
           if (rowAbove >= 0) {
             this.sweep(rowAbove, c);
           }
-          if (rowBelow < this.height) {
+          if (rowBelow < this.state.height) {
             this.sweep(rowBelow, c);
           }
         }
         if (col >= 1) {
           this.sweep(row, col - 1);
         }
-        if (col < this.width - 1) {
+        if (col < this.state.width - 1) {
           this.sweep(row, col + 1);
         }
       })();
@@ -237,7 +273,7 @@ class Grid extends Component {
     }
 
     // add mines
-    for (let count = 0; count < this.numMines; count++) {
+    for (let count = 0; count < this.state.totalNumMines; count++) {
       let randRow = Math.floor(Math.random() * height);
       let randCol = Math.floor(Math.random() * width);
       if (grid[randRow][randCol].val === 'blank') {
@@ -285,6 +321,7 @@ class Grid extends Component {
   render() {
    return(
     <div className="container">
+      <SelectGame gameOptions={this.gameOptions} changeGame={this.changeGame}/>
       <header>
         <div className="scoreboard">
           <div className="score-title">Mines</div>
