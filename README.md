@@ -1,7 +1,7 @@
-View the Application: https://lynne-daniels.github.io/minesweep/
+## Play: https://lynne-daniels.github.io/minesweep/
 
 
-
+![application screenshot](minesweeper.png)
 
 To Deploy Changes:
 
