@@ -32,23 +32,7 @@ class Grid extends Component {
         blankSquares: 381
       }
     }
-    this.changeGame = {
-      handleChange: ((game) => {
-      console.log('Game options clicked', game)
-      clearInterval(this.state.timer);
-      this.setState((prevState) => {
-        let newState = {...prevState};
-        return {
-          ...newState,
-          ...this.gameOptions[game]
-        }
-        }, this.initializeGame())
-      })
-    }
-    // this.height = 9;
-    // this.width = 9;
-    // this.blankSquares = 71
-    // this.numMines = 10
+
     this.state = {
       height: 9,
       width: 9,
@@ -61,8 +45,8 @@ class Grid extends Component {
       timer: null,
       unclearedNonMinedSquares: this.blankSquares
     }
-    // this.clearSquare = this.clearSquare.bind(this);
-    // this.sweep = this.sweep.bind(this);
+
+    this.changeGame = this.changeGame.bind(this);
   }
 
   componentDidMount() {
@@ -70,7 +54,6 @@ class Grid extends Component {
   }
 
   initializeGame() {
-    console.log('initializing', this.state)
     this.setState((prevState) => {
       const newState = {...prevState};
       newState.grid = this.makeGrid(this.state.width, this.state.height);
@@ -93,9 +76,19 @@ class Grid extends Component {
     });
   }
 
-  changeGridSize(size) {  // beginner, advanced, expert
-    
+changeGame (game) {
+  console.log('Game options clicked', game, {...this.gameOptions[game]})
+  clearInterval(this.state.timer);
+  this.setState((prevState) => {
+    let newState = {...prevState};
+    return {
+      ...newState,
+      ...this.gameOptions[game]
+    }
+    }, () => {this.initializeGame()})
   }
+
+
 
   endGameIfWon() {
     // TODO make the inefficient recursive function to clear squares faster, then keep a 

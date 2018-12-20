@@ -3,10 +3,10 @@ import React, { Component } from 'react';
 class SelectGame extends Component {
 
   state = {game: 'beginner'};
+
   handleChange = (e) => {
     let game = e.target.value;
-    console.log('changing', e.target, e.target.value, this.props.changeGame);
-    this.setState({game: e.target.value}, this.props.changeGame.handleChange(game));
+    this.setState({game: e.target.value}, this.props.changeGame(game));
 
   }
 
